@@ -2,7 +2,7 @@ const supabase = require('../config/database')
 
 const getClientes = async (req, res) => {
   try {
-    const { data, error } = supabase.from('clientes').select('*')
+    const { data, error } = await supabase.from('clientes').select('*')
     if (error) return res.status(500).json({ error: error.message })
     console.log('Clientes obtenidos:', data)
     res.json(data)
