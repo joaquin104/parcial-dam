@@ -9,6 +9,8 @@ const getProductos = async (req, res) => {
 
     let query = supabase.from('productos').select('*').order('nombre', { ascending: true })
 
+    /*ILIKE (“insensitive LIKE”) es una extensión propia de Postgres que hace exactamente lo mismo,
+    pero ignorando mayúsculas/minúsculas. Con ILIKE, “Chorizo”, “CHORIZO” y “chorizo” matchean todos contra '%chorizo%'.*/
     if (nombre) {
       query = query.ilike('nombre', `%${nombre}%`)
     }
@@ -20,8 +22,8 @@ const getProductos = async (req, res) => {
 
     if (error) return res.status(500).json({ error: error.message })
     res.json(data)
-  } catch (err) {
-    console.log('Error en getProductos:', err.message)
+  } catch (error) {
+    console.log('Error en getProductos:', error.message)
     res.status(500).json({ error: 'Error del servidor' })
   }
 }
@@ -34,8 +36,8 @@ const getProductoById = async (req, res) => {
 
     if (error) return res.status(404).json({ error: 'Producto no encontrado' })
     res.json(data)
-  } catch (err) {
-    console.log('Error en getProductoById:', err.message)
+  } catch (error) {
+    console.log('Error en getProductoById:', error.message)
     res.status(500).json({ error: 'Error del servidor' })
   }
 }
@@ -59,8 +61,8 @@ const createProducto = async (req, res) => {
 
     if (error) return res.status(500).json({ error: error.message })
     res.status(201).json(data[0])
-  } catch (err) {
-    console.log('Error en createProducto:', err.message)
+  } catch (error) {
+    console.log('Error en createProducto:', error.message)
     res.status(500).json({ error: 'Error del servidor' })
   }
 }
@@ -84,8 +86,8 @@ const updateProducto = async (req, res) => {
     if (error) return res.status(500).json({ error: error.message })
     if (!data || data.length === 0) return res.status(404).json({ error: 'Producto no encontrado' })
     res.json(data[0])
-  } catch (err) {
-    console.log('Error en updateProducto:', err.message)
+  } catch (error) {
+    console.log('Error en updateProducto:', error.message)
     res.status(500).json({ error: 'Error del servidor' })
   }
 }
@@ -98,8 +100,8 @@ const deleteProducto = async (req, res) => {
 
     if (error) return res.status(500).json({ error: error.message })
     res.json({ mensaje: 'Producto eliminado' })
-  } catch (err) {
-    console.log('Error en deleteProducto:', err.message)
+  } catch (error) {
+    console.log('Error en deleteProducto:', error.message)
     res.status(500).json({ error: 'Error del servidor' })
   }
 }
