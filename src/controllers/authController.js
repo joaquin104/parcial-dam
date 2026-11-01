@@ -1,4 +1,21 @@
-const supabase = require('../config/database')
+const { createClient } = require('@supabase/supabase-js')
+require('dotenv').config()
+
+// Cliente de Supabase EXCLUSIVO para auth, separado del que usan
+// productosController/clientesController (config/database.js).
+//
+// Por qué: si usáramos el cliente compartido para signInWithPassword,
+// Supabase le deja una sesión de usuario "pegada" a ese cliente, y todas
+// las consultas siguientes (productos, clientes) que pasen por ese mismo
+// cliente dejan de mandarse como rol "anon" y empiezan a mandarse como
+// "authenticated" -> como las policies de RLS solo autorizan a "anon",
+// esas consultas quedaban bloqueadas y devolvían [] después de loguearse.
+// persistSession/autoRefreshToken en false evita que este cliente arrastre
+// sesión entre pedidos (cada request de Vercel es, de todas formas, una
+// instancia nueva o reciclada del servidor).
+const supabaseAuth = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY, {
+  auth: { persistSession: false, autoRefreshToken: false },
+})
 
 // POST /api/login
 // Valida usuario y contraseña contra Supabase Auth (tabla interna auth.users).
@@ -12,7 +29,7 @@ const login = async (req, res) => {
       return res.status(400).json({ error: 'Email y contraseña son obligatorios' })
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabaseAuth.auth.signInWithPassword({ email, password })
 
     if (error) {
       console.log('Login fallido para', email, '-', error.message)
@@ -42,7 +59,7 @@ const register = async (req, res) => {
       return res.status(400).json({ error: 'Email y contraseña son obligatorios' })
     }
 
-    const { data, error } = await supabase.auth.signUp({ email, password })
+    const { data, error } = await supabaseAuth.auth.signUp({ email, password })
 
     if (error) {
       console.log('Error en register:', error.message)
